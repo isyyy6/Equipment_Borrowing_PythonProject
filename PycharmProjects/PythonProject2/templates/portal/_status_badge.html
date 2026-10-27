@@ -2,7 +2,12 @@
   {% if req.status == 'APPROVED' or req.status == 'RETURNED' %}text-bg-success
   {% elif req.status == 'REJECTED' or req.status == 'CANCELLED' %}text-bg-dark
   {% elif req.status == 'ISSUED' or req.status == 'PARTIALLY_RETURNED' %}text-bg-primary
-  {% else %}text-bg-secondary{% endif %}">{{ req.get_status_display }}</span>
+  {% else %}text-bg-warning{% endif %}">
+  {% if req.status == 'APPROVED' or req.status == 'RETURNED' %}<i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i>
+  {% elif req.status == 'REJECTED' or req.status == 'CANCELLED' %}<i class="bi bi-x-circle-fill me-1" aria-hidden="true"></i>
+  {% elif req.status == 'ISSUED' %}<i class="bi bi-box-arrow-up-right me-1" aria-hidden="true"></i>
+  {% elif req.status == 'PARTIALLY_RETURNED' %}<i class="bi bi-arrow-return-left me-1" aria-hidden="true"></i>
+  {% else %}<i class="bi bi-hourglass-split me-1" aria-hidden="true"></i>{% endif %}{{ req.get_status_display }}</span>
 {% if req.is_overdue %}
-  <span class="badge text-bg-danger">Overdue: {{ req.overdue_days }} day{{ req.overdue_days|pluralize }}</span>
+  <span class="badge text-bg-danger"><i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>Overdue: {{ req.overdue_days }} day{{ req.overdue_days|pluralize }}</span>
 {% endif %}

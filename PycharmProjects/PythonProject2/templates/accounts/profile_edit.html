@@ -1,15 +1,33 @@
 {% extends "base.html" %}
 {% block title %}My profile{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <h1 class="h3 mb-3">My profile</h1>
-    <p class="text-muted">Username: {{ user.username }}</p>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button class="btn btn-primary" type="submit">Save changes</button>
-    </form>
+<div class="row justify-content-center py-2 py-lg-4">
+  <div class="col-12 col-lg-9 col-xl-8">
+    <section class="surface-card p-4 p-md-5">
+      <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-start gap-3 mb-4">
+        <div><span class="badge badge-gold rounded-pill mb-2"><i class="bi bi-person-gear me-1" aria-hidden="true"></i>Account settings</span><h1 class="h2 page-heading mb-1">My profile</h1><p class="text-secondary mb-0">Keep your contact details up to date.</p></div>
+        <div class="rounded-3 bg-light px-3 py-2"><span class="small text-secondary d-block">Username</span><span class="fw-semibold">{{ user.username }}</span></div>
+      </div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>{{ form.non_field_errors }}</div>{% endif %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="row g-3">
+          {% for field in form.visible_fields %}
+            <div class="col-12{% if field.name == 'first_name' or field.name == 'last_name' %} col-md-6{% endif %}{% if field.errors %} has-errors{% endif %}">
+              <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}{% if field.field.required %}<span class="text-danger ms-1" aria-hidden="true">*</span>{% endif %}</label>
+              {{ field }}
+              {% if field.help_text %}<div class="form-text">{{ field.help_text }}</div>{% endif %}
+              {% if field.errors %}<div class="field-errors" role="alert">{{ field.errors }}</div>{% endif %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="d-flex flex-column-reverse flex-sm-row justify-content-end gap-2 mt-4 pt-3 border-top">
+          <a class="btn btn-outline-secondary" href="{% url 'portal:home' %}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Back to portal</a>
+          <button class="btn btn-primary" type="submit"><i class="bi bi-check2-circle me-2" aria-hidden="true"></i>Save changes</button>
+        </div>
+      </form>
+    </section>
   </div>
 </div>
 {% endblock %}
