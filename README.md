@@ -1,2 +1,108 @@
-# Equipment_Borrowing_PythonProject
-Custom Django-based Campus Equipment Borrowing and Inventory System featuring strict role-based access, atomic unit allocation, complete asset lifecycle tracking, maintenance workflows, and real-time operational reports. Built entirely without default Django admin pages.
+# Campus Equipment Borrowing and Inventory System
+
+A custom Python & Django web application designed to streamline campus equipment requests, manage physical unit availability, prevent double-booking, and maintain real-time asset tracking.
+
+---
+
+## 📌 Project Overview
+
+The system features two primary operational levels:
+1. **Basic User Portal:** A custom-coded interface for user authentication, catalog browsing, multi-item request submissions, and request status tracking/cancellation.
+2. **Admin Interface:** An administrative portal for inventory tracking, user management, unit allocation, physical releases, return processing, and maintenance records.
+
+---
+
+## 🔑 Key Features & Architecture
+
+### 👤 Basic User Portal
+* **Account & Profile Management:** User registration, sign-in, sign-out, and profile management (name and contact details). Powered by Django Authentication.
+* **Equipment Catalog Browsing:** Search and view active catalog items by name/category, showing available vs. total physical units while concealing sensitive admin notes.
+* **Request Submission:** Submit multi-item borrowing requests (1–3 items per request) with quantity validation and maximum loan duration limits (up to 7 days).
+* **Request Tracking & Cancellation:** Real-time status tracking for active requests, due dates, and assigned units. Allows cancellation of `Pending` or `Approved` requests prior to equipment issue to release reserved units.
+
+### 🛠️ Administrative Interface
+* **Account Management:** User activation, deactivation, and request history inspection.
+* **Inventory & Unit Lifecycle:** Complete tracking of physical equipment units across five invariant status states: `Available`, `Reserved`, `Issued`, `Maintenance`, and `Retired`.
+* **Request Approval & Unit Allocation:** Review pending requests and atomically allocate available physical units to prevent double-booking.
+* **Release & Return Operations:** Issue approved loans with borrowing slips, record unit returns, flag damaged units for maintenance, and monitor overdue loans.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Backend Framework:** Python 3.x, Django 4.x/5.x (MTV Architecture, Django ORM, Authentication, Migrations)
+* **Frontend:** HTML5, CSS3, JavaScript, Bootstrap
+* **Database:** SQLite (Supports PostgreSQL / MySQL) with transaction safety constraints
+
+---
+
+## 🚀 Setup & Execution Guide
+
+### 1. Prerequisites
+Ensure Python 3.8+ is installed on your local environment.
+
+### 2. Virtual Environment & Dependencies Setup
+Navigate to your project root folder and create a virtual environment:
+
+* **Windows:**
+  ```bash
+  python -m venv venv
+  venv\Scripts\activate
+  ```
+
+* **macOS/Linux:**
+  ```bash
+  python3 -m venv venv
+  source venv/bin/activate
+  ```
+
+Install project requirements:
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Database Migration
+Apply migrations to generate database tables:
+```bash
+python manage.py migrate
+```
+
+### 4. Create Admin Account & Load Seed Data
+Create an administrative superuser account:
+```bash
+python manage.py createsuperuser
+```
+
+*(Optional)* Load initial demo data:
+```bash
+python manage.py loaddata initial_data.json
+```
+
+### 5. Start the Server
+Run the local development server:
+```bash
+python manage.py runserver
+```
+
+Access the application portals in your browser:
+* **User Portal:** `http://127.0.0.1:8000/`
+* **Admin Interface:** `http://127.0.0.1:8000/admin/`
+
+---
+
+## 📊 Core Entities & Workflow Invariants
+
+* **User & Profile:** Core authentication identity linked to active/inactive status and specific role levels.
+* **Category & CatalogItem:** Organized categories of equipment and individual catalog items.
+* **EquipmentUnit:** Physical inventory assets assigned unique asset codes and tracked strictly across `Available`, `Reserved`, `Issued`, `Maintenance`, or `Retired` states.
+* **BorrowRequest & RequestItem:** Manages request submissions, requested quantities, purpose, and requested return dates.
+* **UnitAllocation & Loan:** Handles atomic reservation upon approval, issue timestamps, loan tracking, and return processing.
+
+---
+
+## 🛡️ Security Measures
+
+* Protection against role self-elevation across all user forms and endpoints.
+* CSRF token protection on all state-changing POST requests.
+* Secure password hashing using standard Django authentication algorithms.
+* Strict scope checks ensuring basic users can only access or cancel their own requests.
