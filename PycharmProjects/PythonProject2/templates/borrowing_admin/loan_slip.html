@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Borrowing slip - Request #{{ loan.borrow_request.pk }}</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 720px; margin: 2rem auto; padding: 0 1rem; color: #111; }
+    table { width: 100%; border-collapse: collapse; margin: 1rem 0; }
+    th, td { border: 1px solid #444; padding: .4rem .6rem; text-align: left; }
+    dl { display: grid; grid-template-columns: 11rem 1fr; gap: .3rem 1rem; }
+    dt { font-weight: bold; }
+    .sig { display: flex; gap: 2rem; margin-top: 4rem; }
+    .sig div { flex: 1; border-top: 1px solid #000; padding-top: .3rem; text-align: center; }
+    @media print { .no-print { display: none; } }
+  </style>
+</head>
+<body>
+  <p class="no-print"><button onclick="window.print()">Print slip</button></p>
+  <h1>Equipment Borrowing Slip</h1>
+
+  <dl>
+    <dt>Request no.</dt><dd>#{{ loan.borrow_request.pk }}</dd>
+    <dt>Borrower</dt><dd>{{ borrower.get_full_name|default:borrower.username }} ({{ borrower.username }})</dd>
+    <dt>Contact</dt><dd>{{ borrower.profile.contact_number|default:"-" }}</dd>
+    <dt>Purpose</dt><dd>{{ loan.borrow_request.purpose }}</dd>
+    <dt>Released on</dt><dd>{{ loan.issued_at|date:"M d, Y H:i" }}</dd>
+    <dt>Released by</dt><dd>{{ loan.issued_by.get_full_name|default:loan.issued_by.username }}</dd>
+    <dt>Return by</dt><dd>{{ loan.due_date|date:"M d, Y" }}</dd>
+  </dl>
+
+  <table>
+    <thead><tr><th>Asset code</th><th>Item</th></tr></thead>
+    <tbody>
+      {% for a in units %}
+        <tr><td>{{ a.unit.asset_code }}</td><td>{{ a.request_item.item.name }}</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="sig">
+    <div>Borrower signature</div>
+    <div>Released by (signature)</div>
+  </div>
+</body>
+</html>

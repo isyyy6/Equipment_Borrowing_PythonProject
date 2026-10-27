@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Request #{{ req.pk }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 m-0">Request #{{ req.pk }}</h1>
+  <div>{% include "portal/_status_badge.html" %}</div>
+</div>
+
+<dl class="row">
+  <dt class="col-sm-3">Submitted</dt><dd class="col-sm-9">{{ req.requested_at|date:"M d, Y H:i" }}</dd>
+  <dt class="col-sm-3">Return by</dt><dd class="col-sm-9">{{ req.due_date|date:"M d, Y" }}</dd>
+  <dt class="col-sm-3">Purpose</dt><dd class="col-sm-9">{{ req.purpose }}</dd>
+  {% if req.decided_at %}
+    <dt class="col-sm-3">Decision date</dt><dd class="col-sm-9">{{ req.decided_at|date:"M d, Y H:i" }}</dd>
+    {% if req.decision_reason %}
+      <dt class="col-sm-3">Reason</dt><dd class="col-sm-9">{{ req.decision_reason }}</dd>
+    {% endif %}
+  {% endif %}
+</dl>
+
+<h2 class="h5">Items</h2>
+<div class="table-responsive">
+  <table class="table align-middle">
+    <thead><tr><th>Item</th><th>Quantity</th><th>Assigned units</th></tr></thead>
+    <tbody>
+    {% for ri in req.items.all %}
+      <tr>
+        <td>{{ ri.item.name }}</td>
+        <td>{{ ri.quantity }}</td>
+        <td>
+          {% for a in ri.allocations.all %}
+            <div>
+              {{ a.unit.asset_code }} &ndash;
+              {% if a.cancelled_at %}Cancelled
+              {% elif a.returned_at %}Returned {{ a.returned_at|date:"M d, Y" }}
+              {% elif a.released_at %}Released {{ a.released_at|date:"M d, Y" }}
+              {% else %}Reserved{% endif %}
+            </div>
+          {% empty %}
+            <span class="text-muted">Units are assigned when the request is approved.</span>
+          {% endfor %}
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-3">
+  <a class="btn btn-outline-secondary" href="{% url 'portal:request_list' %}">Back to my requests</a>
+  {% if can_cancel %}
+    <form method="post" action="{% url 'portal:request_cancel' req.pk %}" class="d-inline"
+          onsubmit="return confirm('Cancel this request? This cannot be undone.');">
+      {% csrf_token %}
+      <button class="btn btn-danger" type="submit">Cancel request</button>
+    </form>
+  {% endif %}
+</div>
+{% endblock %}

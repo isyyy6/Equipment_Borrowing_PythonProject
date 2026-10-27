@@ -1,0 +1,28 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>You selected {{ queryset.count }} request(s):</p>
+<ul>
+  {% for r in queryset %}
+    <li>#{{ r.pk }} &ndash; {{ r.user.username }} ({{ r.get_status_display }})</li>
+  {% endfor %}
+</ul>
+
+<form method="post">
+  {% csrf_token %}
+  {% for r in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ r.pk }}">
+  {% endfor %}
+  <input type="hidden" name="action" value="{{ action }}_selected">
+  <input type="hidden" name="apply" value="yes">
+
+  {% if show_reason %}
+  <p>
+    <label for="reason">Reason{% if require_reason %} (required){% else %} (optional){% endif %}:</label><br>
+    <textarea name="reason" id="reason" rows="3" cols="60"></textarea>
+  </p>
+  {% endif %}
+  <input type="submit" value="Confirm {{ action }}">
+  <a href="{% url 'admin:borrowing_borrowrequest_changelist' %}">Cancel</a>
+</form>
+{% endblock %}

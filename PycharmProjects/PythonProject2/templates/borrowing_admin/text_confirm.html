@@ -1,0 +1,24 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>You selected {{ queryset.count }} record(s):</p>
+<ul>
+  {% for obj in queryset %}<li>{{ obj }}</li>{% endfor %}
+</ul>
+
+<form method="post">
+  {% csrf_token %}
+  {% for obj in queryset %}
+    <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}">
+  {% endfor %}
+  <input type="hidden" name="action" value="{{ action_name }}">
+  <input type="hidden" name="apply" value="yes">
+
+  <p>
+    <label for="text">{{ field_label }} (required):</label><br>
+    <textarea name="text" id="text" rows="3" cols="60"></textarea>
+  </p>
+  <input type="submit" value="Confirm">
+  <a href="{{ cancel_url }}">Cancel</a>
+</form>
+{% endblock %}

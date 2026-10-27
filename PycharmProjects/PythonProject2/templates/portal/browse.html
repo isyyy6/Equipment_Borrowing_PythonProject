@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Browse equipment{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Browse equipment</h1>
+
+<form method="get" class="row g-2 mb-4">
+  <div class="col-sm-8 col-md-6">
+    <input type="text" name="q" value="{{ q }}" class="form-control"
+           placeholder="Search by item or category" aria-label="Search equipment">
+  </div>
+  <div class="col-auto">
+    <button class="btn btn-primary" type="submit">Search</button>
+    {% if q %}<a class="btn btn-outline-secondary" href="{% url 'portal:browse' %}">Clear</a>{% endif %}
+  </div>
+</form>
+
+{% if page_obj.object_list %}
+<div class="row row-cols-1 row-cols-md-3 g-3">
+  {% for item in page_obj %}
+  <div class="col">
+    <div class="card h-100">
+      <div class="card-body">
+        <h2 class="h5 card-title">{{ item.name }}</h2>
+        <p class="text-muted small mb-2">{{ item.category.name }}</p>
+        <p class="card-text">{{ item.description|default:"No description." }}</p>
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          Total serviceable units: <strong>{{ item.serviceable }}</strong>
+        </li>
+        <li class="list-group-item">
+          Available now: <strong>{{ item.available }}</strong>
+          {% if item.available == 0 %}
+            <span class="badge text-bg-secondary">None available</span>
+          {% else %}
+            <span class="badge text-bg-success">In stock</span>
+          {% endif %}
+        </li>
+      </ul>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav class="mt-4" aria-label="Pages">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-secondary">No equipment found{% if q %} for "{{ q }}"{% endif %}.</div>
+{% endif %}
+{% endblock %}

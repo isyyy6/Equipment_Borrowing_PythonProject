@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}My requests{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h1 class="h3 m-0">My requests</h1>
+  <a class="btn btn-primary" href="{% url 'portal:request_create' %}">New request</a>
+</div>
+
+<form method="get" class="row g-2 mb-3">
+  <div class="col-auto">
+    <label for="status" class="visually-hidden">Status</label>
+    <select name="status" id="status" class="form-select" onchange="this.form.submit()">
+      <option value="">All statuses</option>
+      {% for value, label in statuses %}
+        <option value="{{ value }}" {% if value == status %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <noscript><div class="col-auto"><button class="btn btn-outline-secondary">Filter</button></div></noscript>
+</form>
+
+{% if page_obj.object_list %}
+<div class="table-responsive">
+  <table class="table table-striped align-middle">
+    <thead>
+      <tr><th>#</th><th>Submitted</th><th>Items</th><th>Return by</th><th>Status</th><th></th></tr>
+    </thead>
+    <tbody>
+    {% for req in page_obj %}
+      <tr>
+        <td>{{ req.pk }}</td>
+        <td>{{ req.requested_at|date:"M d, Y" }}</td>
+        <td>
+          {% for ri in req.items.all %}{{ ri.quantity }} x {{ ri.item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        </td>
+        <td>{{ req.due_date|date:"M d, Y" }}</td>
+        <td>{% include "portal/_status_badge.html" %}</td>
+        <td><a class="btn btn-sm btn-outline-primary" href="{% url 'portal:request_detail' req.pk %}">View</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% if page_obj.has_other_pages %}
+<nav aria-label="Pages">
+  <ul class="pagination">
+    {% if page_obj.has_previous %}
+      <li class="page-item"><a class="page-link" href="?status={{ status }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+    {% endif %}
+    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+    {% if page_obj.has_next %}
+      <li class="page-item"><a class="page-link" href="?status={{ status }}&page={{ page_obj.next_page_number }}">Next</a></li>
+    {% endif %}
+  </ul>
+</nav>
+{% endif %}
+
+{% else %}
+<div class="alert alert-secondary">
+  You have no requests{% if status %} with that status{% endif %} yet.
+  <a href="{% url 'portal:request_create' %}">Submit your first request</a>.
+</div>
+{% endif %}
+{% endblock %}

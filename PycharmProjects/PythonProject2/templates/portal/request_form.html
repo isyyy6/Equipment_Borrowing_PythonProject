@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}New borrowing request{% endblock %}
+{% block content %}
+<h1 class="h3 mb-2">New borrowing request</h1>
+<p class="text-muted">
+  Limits: up to {{ max_days }} days and {{ max_qty }} units per item.
+  Your request starts as Pending and reserves nothing until an admin approves it.
+</p>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+
+  <h2 class="h5 mt-4">Items (1 to 3 different items)</h2>
+  {{ formset.management_form }}
+  {% if formset.non_form_errors %}
+    <div class="alert alert-danger">{{ formset.non_form_errors }}</div>
+  {% endif %}
+  {% for f in formset %}
+    <div class="card mb-2">
+      <div class="card-body">
+        <strong>Item {{ forloop.counter }}</strong>
+        {{ f.as_p }}
+      </div>
+    </div>
+  {% endfor %}
+
+  <button class="btn btn-primary" type="submit">Submit request</button>
+  <a class="btn btn-outline-secondary" href="{% url 'portal:home' %}">Cancel</a>
+</form>
+{% endblock %}

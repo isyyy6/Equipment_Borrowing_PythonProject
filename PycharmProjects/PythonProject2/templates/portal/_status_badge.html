@@ -1,0 +1,8 @@
+<span class="badge
+  {% if req.status == 'APPROVED' or req.status == 'RETURNED' %}text-bg-success
+  {% elif req.status == 'REJECTED' or req.status == 'CANCELLED' %}text-bg-dark
+  {% elif req.status == 'ISSUED' or req.status == 'PARTIALLY_RETURNED' %}text-bg-primary
+  {% else %}text-bg-secondary{% endif %}">{{ req.get_status_display }}</span>
+{% if req.is_overdue %}
+  <span class="badge text-bg-danger">Overdue: {{ req.overdue_days }} day{{ req.overdue_days|pluralize }}</span>
+{% endif %}

@@ -1,0 +1,27 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>
+  Borrower: {{ req.user.username }} &ndash; status: {{ req.get_status_display }}
+  &ndash; current return date: {{ req.due_date|date:"M d, Y" }}
+</p>
+<p>Allowed: any date after today, up to {{ max_days }} days from today.</p>
+
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="{{ action_checkbox_name }}" value="{{ req.pk }}">
+  <input type="hidden" name="action" value="revise_due_date_selected">
+  <input type="hidden" name="apply" value="yes">
+
+  <p>
+    <label for="new_due">New return date:</label><br>
+    <input type="date" name="new_due" id="new_due" required>
+  </p>
+  <p>
+    <label for="text">Reason (required):</label><br>
+    <textarea name="text" id="text" rows="3" cols="60"></textarea>
+  </p>
+  <input type="submit" value="Revise return date">
+  <a href="{% url 'admin:borrowing_borrowrequest_changelist' %}">Cancel</a>
+</form>
+{% endblock %}

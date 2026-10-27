@@ -1,0 +1,38 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<h1>{{ title }}</h1>
+<p>Borrower: {{ req.user.username }} &ndash; return due {{ req.due_date|date:"M d, Y" }}</p>
+
+<form method="post">
+  {% csrf_token %}
+  <input type="hidden" name="{{ action_checkbox_name }}" value="{{ req.pk }}">
+  <input type="hidden" name="action" value="record_returns_selected">
+  <input type="hidden" name="apply" value="yes">
+
+  <table>
+    <thead>
+      <tr><th>Returned?</th><th>Asset code</th><th>Item</th><th>Condition on return</th></tr>
+    </thead>
+    <tbody>
+    {% for a in outstanding %}
+      <tr>
+        <td><input type="checkbox" name="return_{{ a.unit_id }}" value="1"></td>
+        <td>{{ a.unit.asset_code }}</td>
+        <td>{{ a.request_item.item.name }}</td>
+        <td>
+          <select name="condition_{{ a.unit_id }}">
+            {% for value, label in conditions %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+
+  <p>Units marked <strong>Damaged</strong> go to maintenance instead of becoming available.</p>
+  <input type="submit" value="Record returns">
+  <a href="{% url 'admin:borrowing_borrowrequest_changelist' %}">Cancel</a>
+</form>
+{% endblock %}
