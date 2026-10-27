@@ -30,35 +30,35 @@ The system features two primary operational levels:
 
 ## 🛠️ Tech Stack
 
-* **Backend Framework:** Python 3.x, Django 4.x/5.x (MTV Architecture, Django ORM, Authentication, Migrations)
+* **Backend Framework:** Python 3.14.3 and Django 6.1.2 (MTV Architecture, Django ORM, Authentication, Migrations)
 * **Frontend:** HTML5, CSS3, JavaScript, Bootstrap
-* **Database:** SQLite (Supports PostgreSQL / MySQL) with transaction safety constraints
+* **Database:** SQLite for local development and classroom demonstration
 
 ---
 
 ## 🚀 Setup & Execution Guide
 
 ### 1. Prerequisites
-Ensure Python 3.8+ is installed on your local environment.
+The project was developed with Python 3.14.3 and Django 6.1.2. Install Python 3.14, then open a terminal in the folder containing `manage.py`.
 
 ### 2. Virtual Environment & Dependencies Setup
-Navigate to your project root folder and create a virtual environment:
+Create and activate a virtual environment in the project folder:
 
 * **Windows:**
   ```bash
-  python -m venv venv
-  venv\Scripts\activate
+  python -m venv .venv
+  .venv\Scripts\activate
   ```
 
 * **macOS/Linux:**
   ```bash
-  python3 -m venv venv
-  source venv/bin/activate
+  python3 -m venv .venv
+  source .venv/bin/activate
   ```
 
-Install project requirements:
+Install the pinned project dependency:
 ```bash
-pip install -r requirements.txt
+python -m pip install -r requirements.txt
 ```
 
 ### 3. Database Migration
@@ -67,16 +67,17 @@ Apply migrations to generate database tables:
 python manage.py migrate
 ```
 
-### 4. Create Admin Account & Load Seed Data
-Create an administrative superuser account:
+### 4. Create an Admin Account and Optional Demo Data
+Create your own administrative account:
 ```bash
 python manage.py createsuperuser
 ```
 
-*(Optional)* Load initial demo data:
+To load fictional categories, equipment, users, requests, loans, and maintenance records, run the included seed command:
 ```bash
-python manage.py loaddata initial_data.json
+python manage.py seed_demo
 ```
+The command creates a demo admin only if no active superuser exists, and prints generated demo-account credentials in the terminal. If you created an admin first, its password stays unchanged. Use `python manage.py seed_demo --reset` only when you intend to replace existing demo catalog, request, and basic-user data.
 
 ### 5. Start the Server
 Run the local development server:
@@ -84,9 +85,12 @@ Run the local development server:
 python manage.py runserver
 ```
 
-Access the application portals in your browser:
-* **User Portal:** `http://127.0.0.1:8000/`
+Access the application in your browser:
+* **Sign in:** `http://127.0.0.1:8000/accounts/login/`
+* **Register:** `http://127.0.0.1:8000/accounts/register/`
+* **Basic User Portal:** `http://127.0.0.1:8000/portal/`
 * **Admin Interface:** `http://127.0.0.1:8000/admin/`
+The root address redirects signed-in users to the page for their account role.
 
 ---
 
@@ -100,9 +104,20 @@ Access the application portals in your browser:
 
 ---
 
+## Automated Tests and Results
+
+Run the Django test suite from the folder containing `manage.py`:
+```bash
+python manage.py test --verbosity 2
+```
+The test runner creates a temporary test database and prints each test result in the terminal. The GitHub Actions workflow runs the same checks on pushes and pull requests. To keep evidence, open the workflow run under the repository's **Actions** tab and download the `django-test-results` artifact.
+
+---
+
 ## 🛡️ Security Measures
 
 * Protection against role self-elevation across all user forms and endpoints.
 * CSRF token protection on all state-changing POST requests.
 * Secure password hashing using standard Django authentication algorithms.
 * Strict scope checks ensuring basic users can only access or cancel their own requests.
+* The checked-in settings are for local development. Before hosting the application publicly, move `SECRET_KEY` to an environment variable, set `DEBUG=False`, and configure `ALLOWED_HOSTS`.
