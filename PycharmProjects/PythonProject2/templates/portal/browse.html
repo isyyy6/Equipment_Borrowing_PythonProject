@@ -1,43 +1,45 @@
 {% extends "base.html" %}
 {% block title %}Browse equipment{% endblock %}
 {% block content %}
-<h1 class="h3 mb-3">Browse equipment</h1>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+  <div><span class="badge badge-gold rounded-pill mb-2"><i class="bi bi-box-seam me-1" aria-hidden="true"></i>Equipment catalog</span><h1 class="h2 page-heading mb-1">Browse equipment</h1><p class="text-secondary mb-0">Find what you need for your next campus activity.</p></div>
+  <a class="btn btn-primary" href="{% url 'portal:request_create' %}"><i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Start a request</a>
+</div>
 
-<form method="get" class="row g-2 mb-4">
-  <div class="col-sm-8 col-md-6">
-    <input type="text" name="q" value="{{ q }}" class="form-control"
-           placeholder="Search by item or category" aria-label="Search equipment">
-  </div>
-  <div class="col-auto">
-    <button class="btn btn-primary" type="submit">Search</button>
-    {% if q %}<a class="btn btn-outline-secondary" href="{% url 'portal:browse' %}">Clear</a>{% endif %}
+<form method="get" class="surface-card p-3 p-md-4 mb-4" role="search">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-md-6">
+      <label for="equipmentSearch" class="form-label small fw-semibold">Search equipment</label>
+      <div class="input-group"><span class="input-group-text bg-white"><i class="bi bi-search text-secondary" aria-hidden="true"></i></span><input id="equipmentSearch" type="search" name="q" value="{{ q }}" class="form-control" placeholder="Search item or category" aria-label="Search equipment"></div>
+    </div>
+    <div class="col-12 col-md-4">
+      <label for="categoryFilter" class="form-label small fw-semibold">Category</label>
+      <select id="categoryFilter" name="category" class="form-select"><option value="">All categories</option>{% for category_option in categories %}<option value="{{ category_option.pk }}" {% if category == category_option.pk|stringformat:"s" %}selected{% endif %}>{{ category_option.name }}</option>{% endfor %}</select>
+    </div>
+    <div class="col-12 col-md-2 d-grid"><button class="btn btn-primary" type="submit"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Filter</button></div>
+    {% if q or category %}<div class="col-12"><a class="small text-decoration-none" href="{% url 'portal:browse' %}"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Clear filters</a></div>{% endif %}
   </div>
 </form>
 
 {% if page_obj.object_list %}
-<div class="row row-cols-1 row-cols-md-3 g-3">
+<div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
   {% for item in page_obj %}
   <div class="col">
-    <div class="card h-100">
-      <div class="card-body">
-        <h2 class="h5 card-title">{{ item.name }}</h2>
-        <p class="text-muted small mb-2">{{ item.category.name }}</p>
-        <p class="card-text">{{ item.description|default:"No description." }}</p>
+    <article class="card surface-card h-100 overflow-hidden">
+      <div class="card-body p-4 d-flex flex-column">
+        <div class="d-flex justify-content-between align-items-start gap-3 mb-3"><span class="badge rounded-pill text-bg-light border text-secondary"><i class="bi bi-tag me-1" aria-hidden="true"></i>{{ item.category.name }}</span><i class="bi bi-box-seam text-accent fs-5" aria-hidden="true"></i></div>
+        <h2 class="h5 card-title mb-2">{{ item.name }}</h2>
+        <p class="card-text text-secondary flex-grow-1">{{ item.description|default:"No description available." }}</p>
+        <div class="row g-2 mt-2">
+          <div class="col-6"><div class="rounded-3 bg-light p-3 h-100"><div class="small text-secondary mb-1">Total serviceable</div><strong class="data-value fs-5">{{ item.serviceable }}</strong><span class="small text-secondary ms-1">units</span></div></div>
+          <div class="col-6"><div class="rounded-3 bg-light p-3 h-100"><div class="small text-secondary mb-1">Available now</div><strong class="data-value fs-5">{{ item.available }}</strong><span class="small text-secondary ms-1">units</span></div></div>
+        </div>
+        <div class="d-flex justify-content-between align-items-center gap-2 mt-3">
+          {% if item.available == 0 %}<span class="badge text-bg-secondary"><i class="bi bi-x-circle-fill me-1" aria-hidden="true"></i>Unavailable</span>{% else %}<span class="badge text-bg-success"><i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i>Available</span>{% endif %}
+          {% if item.available > 0 %}<a class="btn btn-outline-primary btn-sm" href="{% url 'portal:request_create' %}"><i class="bi bi-plus-circle me-1" aria-hidden="true"></i>Add to Request</a>{% else %}<button class="btn btn-outline-secondary btn-sm" type="button" disabled><i class="bi bi-dash-circle me-1" aria-hidden="true"></i>Unavailable</button>{% endif %}
+        </div>
       </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">
-          Total serviceable units: <strong>{{ item.serviceable }}</strong>
-        </li>
-        <li class="list-group-item">
-          Available now: <strong>{{ item.available }}</strong>
-          {% if item.available == 0 %}
-            <span class="badge text-bg-secondary">None available</span>
-          {% else %}
-            <span class="badge text-bg-success">In stock</span>
-          {% endif %}
-        </li>
-      </ul>
-    </div>
+    </article>
   </div>
   {% endfor %}
 </div>
@@ -46,17 +48,17 @@
 <nav class="mt-4" aria-label="Pages">
   <ul class="pagination">
     {% if page_obj.has_previous %}
-      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.previous_page_number }}">Previous</a></li>
+      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.previous_page_number }}"><i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Previous</a></li>
     {% endif %}
     <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
     {% if page_obj.has_next %}
-      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&page={{ page_obj.next_page_number }}">Next</a></li>
+      <li class="page-item"><a class="page-link" href="?q={{ q|urlencode }}&category={{ category|urlencode }}&page={{ page_obj.next_page_number }}">Next<i class="bi bi-arrow-right ms-1" aria-hidden="true"></i></a></li>
     {% endif %}
   </ul>
 </nav>
 {% endif %}
 
 {% else %}
-<div class="alert alert-secondary">No equipment found{% if q %} for "{{ q }}"{% endif %}.</div>
+<div class="empty-state text-center p-5"><i class="bi bi-search display-6 text-secondary" aria-hidden="true"></i><h2 class="h5 mt-3">No equipment found</h2><p class="text-secondary mb-3">{% if q %}No results for “{{ q }}”. Try another search or category.{% else %}There are no items matching these filters.{% endif %}</p><a class="btn btn-outline-primary btn-sm" href="{% url 'portal:browse' %}">Clear filters</a></div>
 {% endif %}
 {% endblock %}

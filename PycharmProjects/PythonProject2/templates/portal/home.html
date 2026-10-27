@@ -1,6 +1,61 @@
 {% extends "base.html" %}
-{% block title %}Portal{% endblock %}
+{% block title %}Welcome{% endblock %}
 {% block content %}
-<h1 class="h3">Welcome, {{ user.first_name|default:user.username }}!</h1>
-<p>This is the borrower portal. Browsing and requests are coming next.</p>
+<section class="welcome-hero rounded-4 p-4 p-md-5 mb-4 text-white shadow-sm">
+  <div class="row align-items-center g-4">
+    <div class="col-12 col-lg-7">
+      <span class="badge rounded-pill text-bg-light text-primary mb-3"><i class="bi bi-stars me-1" aria-hidden="true"></i>Borrower portal</span>
+      <h1 class="display-6 mb-2">Welcome, {{ user.first_name|default:user.username }}!</h1>
+      <p class="lead mb-0 text-white-50">Find the equipment you need and keep your borrowing requests in one place.</p>
+    </div>
+    <div class="col-12 col-lg-5">
+      <form method="get" action="{% url 'portal:browse' %}" class="bg-white rounded-3 p-2 d-flex gap-2" role="search" aria-label="Search the equipment catalog">
+        <label for="welcomeSearch" class="visually-hidden">Search equipment</label>
+        <input id="welcomeSearch" class="form-control border-0 shadow-none" type="search" name="q" placeholder="What are you looking for?" aria-label="Search equipment">
+        <button class="btn btn-primary flex-shrink-0" type="submit"><i class="bi bi-search me-sm-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Search</span></button>
+      </form>
+      <p class="small text-white-50 mt-2 mb-0"><i class="bi bi-lightning-charge-fill me-1" aria-hidden="true"></i>Search by equipment name or category.</p>
+    </div>
+  </div>
+</section>
+
+<div class="row g-3 mb-5">
+  <div class="col-12 col-md-6">
+    <a class="surface-card d-flex align-items-center gap-3 p-4 h-100 text-decoration-none text-reset" href="{% url 'portal:browse' %}">
+      <span class="rounded-3 bg-accent-subtle text-accent p-3 fs-4"><i class="bi bi-grid-3x3-gap-fill" aria-hidden="true"></i></span>
+      <span class="flex-grow-1"><strong class="d-block">Browse equipment</strong><span class="small text-secondary">Explore available items and compare unit counts.</span></span><i class="bi bi-arrow-right text-accent" aria-hidden="true"></i>
+    </a>
+  </div>
+  <div class="col-12 col-md-6">
+    <a class="surface-card d-flex align-items-center gap-3 p-4 h-100 text-decoration-none text-reset" href="{% url 'portal:request_list' %}">
+      <span class="rounded-3 bg-warning-subtle text-warning-emphasis p-3 fs-4"><i class="bi bi-clipboard2-check-fill" aria-hidden="true"></i></span>
+      <span class="flex-grow-1"><strong class="d-block">Track my requests</strong><span class="small text-secondary">Review request status, items, and return dates.</span></span><i class="bi bi-arrow-right text-accent" aria-hidden="true"></i>
+    </a>
+  </div>
+</div>
+
+<section class="row g-4 align-items-start">
+  <div class="col-12 col-lg-4">
+    <span class="badge badge-gold rounded-pill mb-2"><i class="bi bi-signpost-split me-1" aria-hidden="true"></i>Getting started</span>
+    <h2 class="h4 page-heading">How borrowing works</h2>
+    <p class="text-secondary">A quick guide from finding an item to checking its status.</p>
+    <a class="btn btn-primary" href="{% url 'portal:request_create' %}"><i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Make a request</a>
+  </div>
+  <div class="col-12 col-lg-8">
+    <div class="accordion surface-card overflow-hidden" id="borrowingGuide">
+      <div class="accordion-item border-0 border-bottom">
+        <h3 class="accordion-header"><button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#guideBrowse" aria-expanded="true" aria-controls="guideBrowse"><span class="badge text-bg-primary rounded-pill me-3">1</span>Find equipment</button></h3>
+        <div id="guideBrowse" class="accordion-collapse collapse show" data-bs-parent="#borrowingGuide"><div class="accordion-body text-secondary">Search the catalog, choose a category, and check how many units are available. <a href="{% url 'portal:browse' %}" class="link-accent fw-semibold">Open the catalog</a>.</div></div>
+      </div>
+      <div class="accordion-item border-0 border-bottom">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guideRequest" aria-expanded="false" aria-controls="guideRequest"><span class="badge text-bg-primary rounded-pill me-3">2</span>Submit your request</button></h3>
+        <div id="guideRequest" class="accordion-collapse collapse" data-bs-parent="#borrowingGuide"><div class="accordion-body text-secondary">Select 1 to 3 different items, enter quantities, explain the purpose, and choose a return date. Your request will be reviewed.</div></div>
+      </div>
+      <div class="accordion-item border-0">
+        <h3 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#guideTrack" aria-expanded="false" aria-controls="guideTrack"><span class="badge text-bg-primary rounded-pill me-3">3</span>Track its status</button></h3>
+        <div id="guideTrack" class="accordion-collapse collapse" data-bs-parent="#borrowingGuide"><div class="accordion-body text-secondary">Visit My Requests to see updates. You can cancel a Pending or Approved request from its details. <a href="{% url 'portal:request_list' %}" class="link-accent fw-semibold">View my requests</a>.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock %}

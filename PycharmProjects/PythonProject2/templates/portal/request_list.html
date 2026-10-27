@@ -1,14 +1,15 @@
 {% extends "base.html" %}
 {% block title %}My requests{% endblock %}
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-3">
-  <h1 class="h3 m-0">My requests</h1>
-  <a class="btn btn-primary" href="{% url 'portal:request_create' %}">New request</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+  <div><span class="badge badge-gold rounded-pill mb-2"><i class="bi bi-clock-history me-1" aria-hidden="true"></i>Request activity</span><h1 class="h2 page-heading mb-1">My requests</h1><p class="text-secondary mb-0">Review the status and return dates for your requests.</p></div>
+  <a class="btn btn-primary" href="{% url 'portal:request_create' %}"><i class="bi bi-plus-lg me-2" aria-hidden="true"></i>New request</a>
 </div>
 
-<form method="get" class="row g-2 mb-3">
-  <div class="col-auto">
-    <label for="status" class="visually-hidden">Status</label>
+<form method="get" class="surface-card p-3 mb-3">
+  <div class="row g-2 align-items-end">
+    <div class="col-12 col-sm-6 col-md-4">
+    <label for="status" class="form-label small fw-semibold">Filter by status</label>
     <select name="status" id="status" class="form-select" onchange="this.form.submit()">
       <option value="">All statuses</option>
       {% for value, label in statuses %}
@@ -16,31 +17,48 @@
       {% endfor %}
     </select>
   </div>
-  <noscript><div class="col-auto"><button class="btn btn-outline-secondary">Filter</button></div></noscript>
+  <noscript><div class="col-auto"><button class="btn btn-outline-primary"><i class="bi bi-funnel me-1" aria-hidden="true"></i>Filter</button></div></noscript>
+  </div>
 </form>
 
 {% if page_obj.object_list %}
+<div class="surface-card overflow-hidden">
 <div class="table-responsive">
-  <table class="table table-striped align-middle">
-    <thead>
-      <tr><th>#</th><th>Submitted</th><th>Items</th><th>Return by</th><th>Status</th><th></th></tr>
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-light">
+      <tr><th scope="col">Request</th><th scope="col">Submitted</th><th scope="col">Items</th><th scope="col">Return by</th><th scope="col">Status</th><th scope="col"><span class="visually-hidden">Actions</span></th></tr>
     </thead>
     <tbody>
     {% for req in page_obj %}
       <tr>
-        <td>{{ req.pk }}</td>
+        <td><span class="badge request-id">#{{ req.pk }}</span></td>
         <td>{{ req.requested_at|date:"M d, Y" }}</td>
-        <td>
-          {% for ri in req.items.all %}{{ ri.quantity }} x {{ ri.item.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+        <td class="small">
+          {% for ri in req.items.all %}<div class="mb-1"><span class="text-secondary">{{ ri.quantity }}×</span> {{ ri.item.name }}{% for allocation in ri.allocations.all %} <span class="badge asset-code">{{ allocation.unit.asset_code }}</span>{% endfor %}</div>{% endfor %}
         </td>
         <td>{{ req.due_date|date:"M d, Y" }}</td>
         <td>{% include "portal/_status_badge.html" %}</td>
-        <td><a class="btn btn-sm btn-outline-primary" href="{% url 'portal:request_detail' req.pk %}">View</a></td>
+        <td class="text-end text-nowrap"><a class="btn btn-sm btn-outline-primary" href="{% url 'portal:request_detail' req.pk %}"><i class="bi bi-eye me-1" aria-hidden="true"></i>View</a>
+          {% if req.status == 'PENDING' or req.status == 'APPROVED' %}<button class="btn btn-sm btn-outline-danger ms-1" type="button" data-bs-toggle="modal" data-bs-target="#cancelRequest{{ req.pk }}"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Cancel</button>{% endif %}
+        </td>
       </tr>
     {% endfor %}
     </tbody>
   </table>
 </div>
+</div>
+
+{% for req in page_obj %}
+  {% if req.status == 'PENDING' or req.status == 'APPROVED' %}
+  <div class="modal fade" id="cancelRequest{{ req.pk }}" tabindex="-1" aria-labelledby="cancelRequestLabel{{ req.pk }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 shadow">
+      <div class="modal-header"><h2 class="modal-title h5" id="cancelRequestLabel{{ req.pk }}"><i class="bi bi-exclamation-triangle-fill text-danger me-2" aria-hidden="true"></i>Cancel request?</h2><button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button></div>
+      <div class="modal-body">Are you sure you want to cancel request <span class="badge request-id">#{{ req.pk }}</span>? This action cannot be undone.</div>
+      <div class="modal-footer"><button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Keep request</button><form method="post" action="{% url 'portal:request_cancel' req.pk %}" class="m-0">{% csrf_token %}<button class="btn btn-danger" type="submit"><i class="bi bi-x-circle me-1" aria-hidden="true"></i>Cancel request</button></form></div>
+    </div></div>
+  </div>
+  {% endif %}
+{% endfor %}
 
 {% if page_obj.has_other_pages %}
 <nav aria-label="Pages">
@@ -57,9 +75,6 @@
 {% endif %}
 
 {% else %}
-<div class="alert alert-secondary">
-  You have no requests{% if status %} with that status{% endif %} yet.
-  <a href="{% url 'portal:request_create' %}">Submit your first request</a>.
-</div>
+<div class="empty-state text-center p-5"><i class="bi bi-inbox display-6 text-secondary" aria-hidden="true"></i><h2 class="h5 mt-3">No requests to show</h2><p class="text-secondary mb-3">You have no requests{% if status %} with that status{% endif %} yet.</p><a class="btn btn-primary btn-sm" href="{% url 'portal:request_create' %}"><i class="bi bi-plus-lg me-1" aria-hidden="true"></i>Submit a request</a></div>
 {% endif %}
 {% endblock %}

@@ -1,15 +1,28 @@
 {% extends "base.html" %}
 {% block title %}Register{% endblock %}
 {% block content %}
-<div class="row justify-content-center">
-  <div class="col-md-6">
-    <h1 class="h3 mb-3">Create an account</h1>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button class="btn btn-primary" type="submit">Register</button>
-    </form>
-    <p class="mt-3">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+<div class="row justify-content-center py-3 py-lg-4">
+  <div class="col-12 col-sm-11 col-lg-8 col-xl-7">
+    <section class="surface-card p-4 p-md-5">
+      <div class="mb-4"><span class="badge badge-gold rounded-pill mb-2"><i class="bi bi-person-plus me-1" aria-hidden="true"></i>New borrower</span><h1 class="h2 page-heading mb-2">Create an account</h1><p class="text-secondary mb-0">Set up your account to request campus equipment.</p></div>
+      <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}<div class="alert alert-danger" role="alert"><i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>{{ form.non_field_errors }}</div>{% endif %}
+        {% for hidden in form.hidden_fields %}{{ hidden }}{% endfor %}
+        <div class="row g-3">
+        {% for field in form.visible_fields %}
+          <div class="col-12{% if field.name == 'first_name' or field.name == 'last_name' %} col-md-6{% endif %}{% if field.errors %} has-errors{% endif %}">
+            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">{{ field.label }}{% if field.field.required %}<span class="text-danger ms-1" aria-hidden="true">*</span>{% endif %}</label>
+            {{ field }}
+            {% if field.help_text %}<div class="form-text">{{ field.help_text|safe }}</div>{% endif %}
+            {% if field.errors %}<div class="field-errors" role="alert">{{ field.errors }}</div>{% endif %}
+          </div>
+        {% endfor %}
+        </div>
+        <button class="btn btn-primary w-100 mt-4" type="submit"><i class="bi bi-person-check me-2" aria-hidden="true"></i>Create account</button>
+      </form>
+      <p class="text-center text-secondary small mt-4 mb-0">Already registered? <a class="fw-semibold link-accent" href="{% url 'accounts:login' %}">Log in</a></p>
+    </section>
   </div>
 </div>
 {% endblock %}

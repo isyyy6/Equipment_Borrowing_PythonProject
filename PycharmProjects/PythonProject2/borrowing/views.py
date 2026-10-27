@@ -7,7 +7,7 @@ from django.db.models import Count, Q
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
-from inventory.models import CatalogItem, EquipmentUnit
+from inventory.models import CatalogItem, Category, EquipmentUnit
 
 from .forms import BorrowRequestForm, RequestItemFormSet
 from .models import BorrowRequest, Loan, SystemSetting, UnitAllocation
@@ -22,6 +22,9 @@ def home(request):
 @login_required
 def browse(request):
     q = request.GET.get("q", "").strip()
+    category = request.GET.get("category", "").strip()
+    if not category.isdigit():
+        category = ""
 
     not_serviceable = [
         EquipmentUnit.Status.MAINTENANCE,
@@ -39,10 +42,21 @@ def browse(request):
     )
     if q:
         items = items.filter(Q(name__icontains=q) | Q(category__name__icontains=q))
+    if category:
+        items = items.filter(category_id=category)
 
     paginator = Paginator(items.order_by("name"), 6)
     page_obj = paginator.get_page(request.GET.get("page"))
-    return render(request, "portal/browse.html", {"page_obj": page_obj, "q": q})
+    return render(
+        request,
+        "portal/browse.html",
+        {
+            "page_obj": page_obj,
+            "q": q,
+            "category": category,
+            "categories": Category.objects.filter(is_active=True).order_by("name"),
+        },
+    )
 
 
 @login_required
@@ -83,7 +97,7 @@ def request_list(request):
     status = request.GET.get("status", "")
     requests_qs = (
         BorrowRequest.objects.filter(user=request.user)  # only MY requests
-        .prefetch_related("items__item")
+        .prefetch_related("items__item", "items__allocations__unit")
         .order_by("-requested_at")
     )
     if status in BorrowRequest.Status.values:
