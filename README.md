@@ -104,6 +104,16 @@ The root address redirects signed-in users to the page for their account role.
 
 ---
 
+## Automated Tests and Results
+
+Run the Django test suite from the folder containing `manage.py`:
+```bash
+python manage.py test --verbosity 2
+```
+The test runner creates a temporary test database and prints each test result in the terminal. The GitHub Actions workflow runs the same checks on pushes and pull requests. To keep evidence, open the workflow run under the repository's **Actions** tab and download the `django-test-results` artifact.
+
+---
+
 ## 🛡️ Security Measures
 
 * Protection against role self-elevation across all user forms and endpoints.
